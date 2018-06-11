@@ -29,7 +29,7 @@ class DockerProcessManagerTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Invalid container name prefix "**wrong**"
      */
     public function testInvalidPrefix()
