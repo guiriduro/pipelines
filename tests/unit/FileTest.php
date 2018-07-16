@@ -7,7 +7,7 @@ namespace Ktomk\Pipelines;
 use Ktomk\Pipelines\Runner\Reference;
 use PHPUnit\Framework\TestCase;
 
-/**
+/** 
  * @covers \Ktomk\Pipelines\File
  */
 class FileTest extends TestCase
@@ -40,6 +40,18 @@ class FileTest extends TestCase
     public function testCreateFromFileWithInvalidId()
     {
         $path = __DIR__ . '/../data/invalid-pipeline-id.yml';
+
+        $file = File::createFromFile($path);
+
+        $this->assertNotNull($file);
+
+        return $file;
+    }
+
+    public function testCreateFromFileWithValidServiceDefinition()
+    {
+        $this->markTestSkipped('Revisit when ServiceDefinitions pass all lower level tests.');
+        $path = __DIR__ . '/../data/pipelines-with-services.yml';
 
         $file = File::createFromFile($path);
 
@@ -139,6 +151,31 @@ class FileTest extends TestCase
         $steps = $pipeline->getSteps();
         $this->assertArrayHasKey(0, $steps);
         $this->assertInstanceOf('Ktomk\Pipelines\Step', $steps[0]);
+    }
+
+
+    public function testServiceDefinition()
+    {
+        $serviceDefs = 
+            [   'pipelines' => [ 'default' => []],  // dummy empty pipelines
+                'definitions' => 
+                    [ 'services' => 
+                        [ 'alabel' =>
+                            [ 'image' => 'mysql',
+                              'environment' => [
+                                'MYSQL_ROOT_PASSWORD' => 'unsafe'
+                                ]
+                            ]
+                        ]
+                    ]   
+            ];
+
+        $file = new File($serviceDefs);
+        $services = $file->getServiceDefinitions();
+        // service Definitions should be an associative array of Service[s]
+        // throw new \Exception("Services: ".print_r($services, true));
+        $this->assertArrayHasKey('alabel', $services);
+        $this->assertInstanceOf('Ktomk\Pipelines\ServiceDefinition', $services['alabel']);
     }
 
     /**

@@ -35,6 +35,8 @@ class File
      */
     private $pipelines;
 
+    private $services;
+
     /**
      * File constructor.
      *
@@ -52,6 +54,10 @@ class File
         self::validateImage($array);
 
         $this->pipelines = $this->parsePipelineReferences($array['pipelines']);
+
+        // service definitions are optional
+        if (array_key_exists('definitions', $array))
+            $this->services = $this->parseServiceDefinitions($array['definitions']);
 
         $this->array = $array;
     }
@@ -239,6 +245,14 @@ class File
     }
 
     /**
+     * @return array
+     */
+    public function getServiceDefinitions()
+    {
+        return $this->services ? $this->services : [];
+    }
+
+    /**
      * @param string $id
      * @throws InvalidArgumentException
      * @throws ParseException
@@ -374,6 +388,34 @@ class File
         }
 
         return $references;
+    }
+
+    /**
+     * @param array &$array section of parsed yaml under 'definitions'
+     * @throws \Ktomk\Pipelines\File\ParseException
+     * @return array 
+     */
+    public function parseServiceDefinitions(array &$array)
+    {
+        // as of writing, definitions can have 'cache' and 'service' children (not enforced)
+        // if it has services, these should exist and be valid
+        //throw new \Exception("parseServiceDefinitions: ".print_r($array, true));
+        if ( array_key_exists('services', $array) ) 
+        {
+            if (!is_array($array['services'])) {
+                ParseException::__("'services' has no service definitions");
+            }
+            $result = [];
+            // services should be an associative array of 'label' => Service
+            foreach ($array['services'] as $label => $servicedef) {
+                $result[$label] = new ServiceDefinition($this, $servicedef);
+            }
+            // throw new \Exception("Inline Services: ".print_r($result, true));
+            return $result;
+        }
+        else
+            return [];
+
     }
 
     /**
