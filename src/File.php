@@ -406,9 +406,10 @@ class File
                 ParseException::__("'services' has no service definitions");
             }
             $result = [];
-            // services should be an associative array of 'label' => Service
+            // File should parse to an associative array of 'label' => ServiceDefinition
+            // ServiceDefinition yaml chunk includes the label
             foreach ($array['services'] as $label => $servicedef) {
-                $result[$label] = new ServiceDefinition($this, $servicedef);
+                $result[$label] = new ServiceDefinition($this, [$label => $servicedef]);
             }
             // throw new \Exception("Inline Services: ".print_r($result, true));
             return $result;

@@ -1,0 +1,17 @@
+image: mysql:5
+
+pipelines:
+  default:
+    - step:
+        script: # Modify the commands below to build your repository.
+          - sleep 15  # wait for mysql to spool up
+          - mysql -h127.0.0.1 -uroot -ptoor --execute="show tables;" information_schema
+        services:
+          - mydb
+
+definitions:
+  services:
+    mydb:
+      image: mysql:5
+      environment:
+        MYSQL_ROOT_PASSWORD: toor

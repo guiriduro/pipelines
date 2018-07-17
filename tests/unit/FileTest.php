@@ -50,7 +50,6 @@ class FileTest extends TestCase
 
     public function testCreateFromFileWithValidServiceDefinition()
     {
-        $this->markTestSkipped('Revisit when ServiceDefinitions pass all lower level tests.');
         $path = __DIR__ . '/../data/pipelines-with-services.yml';
 
         $file = File::createFromFile($path);
@@ -153,8 +152,10 @@ class FileTest extends TestCase
         $this->assertInstanceOf('Ktomk\Pipelines\Step', $steps[0]);
     }
 
-
-    public function testServiceDefinition()
+    /**
+     * Simple valid service definition results in ServiceDefinition object 
+     */
+    public function testValidServiceDefinition()
     {
         $serviceDefs = 
             [   'pipelines' => [ 'default' => []],  // dummy empty pipelines
@@ -176,6 +177,22 @@ class FileTest extends TestCase
         // throw new \Exception("Services: ".print_r($services, true));
         $this->assertArrayHasKey('alabel', $services);
         $this->assertInstanceOf('Ktomk\Pipelines\ServiceDefinition', $services['alabel']);
+    }
+
+    /**
+     * Empty service definition throws parser exception
+     *
+     * @expectedException \Ktomk\Pipelines\File\ParseException
+     * @expectedExceptionMessage 'services' has no service definitions
+     */
+    public function testEmptyServiceDefinitionsParseError()
+    {
+        $serviceDefs = 
+            [   'pipelines' => [ 'default' => []],  // dummy empty pipelines
+                'definitions' => [ 'services' => null]
+            ];
+        
+        new File($serviceDefs);
     }
 
     /**
